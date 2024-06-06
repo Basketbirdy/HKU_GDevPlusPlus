@@ -4,6 +4,9 @@
 #include <math.h>
 #include <SFML/Graphics.hpp>
 
+Circle::Circle(): radius(10) {
+}
+
 Circle::Circle(float r) : radius(r) {
 
 }
@@ -21,11 +24,11 @@ void Circle::draw(sf::RenderWindow& window) {
 	shape.setFillColor(sf::Color::Blue);
 
 	shape.setOrigin(radius, radius);
-	shape.setPosition(sf::Vector2f{ pos.x, pos.y });
+	shape.setPosition(pos.sfVector());
 
 	window.draw(shape);
 }
 
-Vector2 Circle::GetPosition() {
+Vector2& Circle::GetPosition() {
 	return pos;
 }

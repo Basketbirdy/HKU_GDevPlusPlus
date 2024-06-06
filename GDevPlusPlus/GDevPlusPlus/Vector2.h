@@ -1,4 +1,7 @@
 #pragma once
+
+#include <SFML/Graphics.hpp>
+
 class Vector2
 {
 public:
@@ -7,6 +10,7 @@ public:
 
 	Vector2();
 	Vector2(float x, float y);
+	sf::Vector2f sfVector();
 	virtual ~Vector2();
 
 	float Length();
@@ -16,7 +20,7 @@ public:
 	Vector2 Subtract(Vector2 v);
 	Vector2 Multiply(float scalar);
 	Vector2 Divide(float scalar);
-	float DotProduct(Vector2 v);
+	float Dot(Vector2 v);
 
 	friend Vector2 operator+(Vector2 v1, Vector2 v2);
 	friend Vector2 operator-(Vector2 v1, Vector2 v2);

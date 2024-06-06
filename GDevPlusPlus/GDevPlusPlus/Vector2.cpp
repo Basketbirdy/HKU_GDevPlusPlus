@@ -10,6 +10,12 @@ Vector2::Vector2() {
 Vector2::Vector2(float x = 0, float y = 0) : x(x), y(y) {
 }
 
+// converts my vector2 class into a sfml vector2f class
+sf::Vector2f Vector2::sfVector() 
+{
+	return sf::Vector2f(x, y);
+}
+
 Vector2::~Vector2() {
 }
 
@@ -17,6 +23,7 @@ float Vector2::Length() {
 	return std::sqrt(x * x + y * y);
 }
 
+// normalizes the vector length to 1
 Vector2 Vector2::Normalize() {
 	float length = Vector2::Length();
 
@@ -52,7 +59,7 @@ Vector2 Vector2::Divide(float scalar)
 	return Vector2::Vector2(newX, newY);
 }
 
-float Vector2::DotProduct(Vector2 v) {
+float Vector2::Dot(Vector2 v) {
 	return (x * v.x) + (y * v.y);
 }
 

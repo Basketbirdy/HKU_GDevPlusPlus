@@ -38,13 +38,13 @@ void Shape::SetPosition(Vector2 pos)
 	this->pos.y = pos.y;
 }
 
-Vector2 Shape::GetPosition() {
+Vector2& Shape::GetPosition() {
 }
 
 float Shape::area() {
 	return 0;
 }
 
-void Shape::draw(sf::Window& window) {
+void Shape::draw(sf::RenderWindow& window) {
 
 }

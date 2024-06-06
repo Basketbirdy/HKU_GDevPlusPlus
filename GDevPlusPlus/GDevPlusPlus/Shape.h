@@ -22,9 +22,9 @@ public:
 	void SetAlpha(float a);
 	void SetPosition(Vector2 pos);
 
-	virtual Vector2 GetPosition() = 0;
+	virtual Vector2& GetPosition() = 0;
 	virtual float area(); // = 0, word niet gedefinieerd in deze class, MOET in subclass
-	virtual void draw(sf::Window& window);
+	virtual void draw(sf::RenderWindow& window);
 };
 
 

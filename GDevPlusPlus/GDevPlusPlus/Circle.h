@@ -8,10 +8,11 @@ private:
 	float radius;
 
 public:
+	Circle();
 	Circle(float r);
 	//Circle(const Circle& other);
 
-	Vector2 GetPosition();
+	Vector2& GetPosition();
 	float area();
 	virtual void draw(sf::RenderWindow& window);
 };
