@@ -21,16 +21,20 @@ Vector2 inputDir;
 
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode(windowWidth, windowHeight), "SFML works!");
+    sf::RenderWindow window(sf::VideoMode(windowWidth, windowHeight), "Speedracer");
+    window.setFramerateLimit(60);
 
-    //auto circle = Circle{ 50 };
-    //circle.SetPosition(Vector2{ (float)windowWidth / 2, (float)windowHeight / 2 });
-    //auto rb = Rigidbody{ 1 };
-
+    // player
     player = new Player{ 40, 2, 0, Vector2(windowWidth/2,windowHeight/6 * 5), 1 };
     inputDir = Vector2();
 
-    window.setFramerateLimit(60);
+    // background
+    sf::Texture bgTexture;
+    if (!bgTexture.loadFromFile("Assets/Images/BackgroundSprite.png")) {
+        std::cout << "Nope, not loading" << std::endl;
+    }
+
+    sf::Sprite bgSprite(bgTexture);
 
     while (window.isOpen())
     {
@@ -64,8 +68,9 @@ int main()
 
         //circle.SetPosition(rb.GetNewPosition(circle.GetPosition(), rb.velocity, rb.acceleration, deltaTime));
         //circle.draw(window);
-
-        player->UpdatePlayer(inputDir, window, deltaTime);
+        
+        window.draw(bgSprite);
+        player->Update(inputDir, window, deltaTime);
 
         window.display();
     }

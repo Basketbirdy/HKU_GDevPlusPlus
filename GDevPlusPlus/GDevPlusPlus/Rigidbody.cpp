@@ -55,8 +55,8 @@ void Rigidbody::UpdateRigidbody(Vector2 force, float gravity, float dt) {
 	velocity = GetNewVelocity(finalForce, dt);
 	pos = GetNewPosition(dt);
 
-	std::cout << "acceleration: " << acceleration.x << ", " << acceleration.y << std::endl;
-	std::cout << "velocity: " << velocity.x << ", " << velocity.y << std::endl;
+	//std::cout << "acceleration: " << acceleration.x << ", " << acceleration.y << std::endl;
+	//std::cout << "velocity: " << velocity.x << ", " << velocity.y << std::endl;
 }
 
 

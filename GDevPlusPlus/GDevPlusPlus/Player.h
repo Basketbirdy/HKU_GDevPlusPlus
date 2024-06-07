@@ -21,6 +21,6 @@ public:
 	Player& operator=(const Player& other);
 	~Player();
 
-	void UpdatePlayer(Vector2 input, sf::RenderWindow& window, float dt);
+	void Update(Vector2 input, sf::RenderWindow& window, float dt);
 };
 

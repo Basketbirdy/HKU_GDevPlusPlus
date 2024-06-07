@@ -12,6 +12,7 @@ Player::Player(const Player& other)
 {
 	radius = other.radius;
 	movementForce = other.movementForce;
+	gravity = other.gravity;
 	body = other.body;
 	rb = other.rb;
 }
@@ -20,6 +21,7 @@ Player& Player::operator=(const Player& other) {
 	if (this != &other) {
 		radius = other.radius;
 		movementForce = other.movementForce;
+		gravity = other.gravity;
 		body = other.body;
 		rb = other.rb;
 	}
@@ -32,7 +34,7 @@ Player::~Player()
 }
 
 // function that should get called in the main function window while loop
-void Player::UpdatePlayer(Vector2 input, sf::RenderWindow& window, float dt)
+void Player::Update(Vector2 input, sf::RenderWindow& window, float dt)
 {
 	rb.UpdateRigidbody(input * (movementForce * 1000), gravity, dt);
 
