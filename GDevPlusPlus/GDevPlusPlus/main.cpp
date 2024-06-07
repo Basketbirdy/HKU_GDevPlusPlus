@@ -27,7 +27,7 @@ int main()
     //circle.SetPosition(Vector2{ (float)windowWidth / 2, (float)windowHeight / 2 });
     //auto rb = Rigidbody{ 1 };
 
-    player = new Player{ 10, 100, Vector2(windowWidth/2,windowHeight/2), 10 };
+    player = new Player{ 40, 2, 0, Vector2(windowWidth/2,windowHeight/6 * 5), 1 };
     inputDir = Vector2();
 
     window.setFramerateLimit(60);

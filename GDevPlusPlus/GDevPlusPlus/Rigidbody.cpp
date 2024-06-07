@@ -4,66 +4,56 @@
 
 #include <iostream>
 
-Rigidbody::Rigidbody() : mass(10), frictionCoefficient(.1) {
+Rigidbody::Rigidbody() : mass(10), frictionCoefficient(Vector2{7, 2}) {
 	pos = Vector2{ 0,0 };
 	velocity = Vector2(0, -10);
 	acceleration = Vector2();
 }
 
-Rigidbody::Rigidbody(float mass, float frictionCoefficient) : mass(mass), frictionCoefficient(frictionCoefficient) {
+Rigidbody::Rigidbody(float mass, Vector2 frictionCoefficient) : mass(mass), frictionCoefficient(frictionCoefficient) {
 	pos = Vector2{ 0,0 };
 	velocity = Vector2(0, -10);
 	acceleration = Vector2();
 }
 
-Rigidbody::Rigidbody(Vector2 pos, float mass, float frictionCoefficient): pos(pos), mass(mass), frictionCoefficient(frictionCoefficient) {
+Rigidbody::Rigidbody(Vector2 pos, float mass, Vector2 frictionCoefficient): pos(pos), mass(mass), frictionCoefficient(frictionCoefficient) {
 }
 
 Rigidbody::~Rigidbody(){
 }
 
-Vector2 Rigidbody::GetNewVelocity(Vector2 initialVelocity, Vector2 acceleration, float time)
+Vector2 Rigidbody::GetNewVelocity(Vector2 force, float time)
 {
-	Vector2 newVelocity = initialVelocity + acceleration * time;
+	Vector2 newVelocity = velocity + force / mass * time;
 	return newVelocity;
 }
 
-Vector2 Rigidbody::GetNewPosition(Vector2 currentPosition, Vector2 initialVelocity, Vector2 acceleration, float time) {
-	Vector2 deltaPos = initialVelocity * time + (acceleration * .5f) * time * time;
-	return currentPosition + deltaPos;
-}
-
-void Rigidbody::AddForce(Vector2 direction, float strength, ForceMode mode, float dt)
+Vector2 Rigidbody::GetNewPosition(float time)
 {
-	switch (mode) {
-	case Force:
-		velocity = velocity + (direction * strength) * dt / mass;
-		break;
-	case Impulse:
-		velocity = velocity + (direction * strength) / mass;
-		break;
-	}
+	Vector2 newPosition = pos + velocity * time;
+	return newPosition;
 }
 
-Vector2 Rigidbody::CalculateGravity(float m) {
-	Vector2 gravity = g * m;
+Vector2 Rigidbody::CalculateGravity(float gMultiplier) {
+	Vector2 gravity = g * gMultiplier * mass;
 	std::cout << "gravity: " << gravity.x << ", " << gravity.y << std::endl;
 	return gravity;
 }
 
-Vector2 Rigidbody::CalculateDrag(float friction, Vector2 v) {
-	float xDrag = friction * v.x;
-	float yDrag = friction * v.y;
-	return Vector2{ xDrag, yDrag };
+Vector2 Rigidbody::CalculateDrag(Vector2 friction, Vector2 v) {
+	float xDrag = friction.x * v.x;
+	float yDrag = friction.y * v.y;
+	return Vector2{ -xDrag, -yDrag };
 }
 
-Vector2 Rigidbody::CalculateAcceleration(Vector2 f, float m) {
-	return f / m;
-}
+void Rigidbody::UpdateRigidbody(Vector2 force, float gravity, float dt) {
 
-void Rigidbody::UpdateRigidbody(Vector2 force, float dt) {
-	acceleration = CalculateAcceleration(CalculateGravity(mass), mass);
-	velocity = GetNewVelocity(velocity, acceleration, dt);
+	Vector2 dragForce = CalculateDrag(frictionCoefficient, velocity);
+	Vector2 gravityForce = CalculateGravity(gravity);
+	Vector2 finalForce = force + gravityForce + dragForce;
+
+	velocity = GetNewVelocity(finalForce, dt);
+	pos = GetNewPosition(dt);
 
 	std::cout << "acceleration: " << acceleration.x << ", " << acceleration.y << std::endl;
 	std::cout << "velocity: " << velocity.x << ", " << velocity.y << std::endl;

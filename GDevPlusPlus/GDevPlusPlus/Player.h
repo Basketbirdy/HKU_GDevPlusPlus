@@ -10,12 +10,13 @@ class Player
 private:
 	float radius;
 	float movementForce;
+	float gravity;
 
 public:
 	Circle body;
 	Rigidbody rb;
 
-	Player(float radius, float movementForce, Vector2 pos, float mass);
+	Player(float radius, float movementForce, float gravity, Vector2 pos, float mass);
 	Player(const Player& other);
 	Player& operator=(const Player& other);
 	~Player();

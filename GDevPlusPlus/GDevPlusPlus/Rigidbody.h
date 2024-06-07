@@ -6,7 +6,7 @@ class Rigidbody
 {
 private:
 
-	Vector2 g = Vector2{ 0, 9.81f };
+	Vector2 g = Vector2{ 0, 9.81 };
 	enum ForceMode
 	{
 		Force,
@@ -15,7 +15,7 @@ private:
 
 public:
 	float mass;
-	float frictionCoefficient;
+	Vector2 frictionCoefficient;
 
 	Vector2 pos;
 
@@ -23,21 +23,18 @@ public:
 	Vector2 acceleration;
 
 	Rigidbody();
-	Rigidbody(float mass, float frictionCoefficient);
-	Rigidbody(Vector2 pos, float mass, float frictionCoefficient);
+	Rigidbody(float mass, Vector2 frictionCoefficient);
+	Rigidbody(Vector2 pos, float mass, Vector2 frictionCoefficient);
 	~Rigidbody();
 
-	Vector2 GetNewVelocity(Vector2 initialVelocity, Vector2 acceleration, float time);
-	Vector2 GetNewPosition(Vector2 currentPosition, Vector2 initialVelocity, Vector2 acceleration, float time);
+	Vector2 GetNewVelocity(Vector2 force, float time);
 
-	void AddForce(Vector2 direction, float strength, ForceMode mode, float dt);
+	Vector2 GetNewPosition(float time);
 
-	Vector2 CalculateGravity(float m);
-	Vector2 CalculateDrag(float friction, Vector2 v);
+	Vector2 CalculateGravity(float gMultiplier);
+	Vector2 CalculateDrag(Vector2 friction, Vector2 v);
 
-	Vector2 CalculateAcceleration(Vector2 f, float m);
-
-	void UpdateRigidbody(Vector2 force, float dt);
+	void UpdateRigidbody(Vector2 force, float gravity, float dt);
 };
 
 
