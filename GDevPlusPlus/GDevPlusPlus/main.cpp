@@ -10,14 +10,23 @@
 
 #include "Player.h"
 
+#include "Obstacle.h"
+
 // window
 int windowWidth = 480;
 int windowHeight = 640;
 
 sf::Clock deltaClock;
 
+// player
 Player* player;
 Vector2 inputDir;
+
+// obstacles
+int obstacleCount = 10;
+
+std::vector<Obstacle*> obstacles;
+
 
 int main()
 {
@@ -27,6 +36,15 @@ int main()
     // player
     player = new Player{ 40, 2, 0, Vector2(windowWidth/2,windowHeight/6 * 5), 1 };
     inputDir = Vector2();
+
+    // obstacle
+    for (int i = obstacleCount; i > 0; i--) {
+        int xRange = 6 - 1 + 1;
+        int randomXPos = rand() % xRange + 1;
+        int yRange = -30 - -2400 + 1;
+        int randomYPos = rand() % yRange + -2400;
+        obstacles.push_back(new Obstacle{ 25, 0, 5, 5, Vector2{ (float)windowWidth / 6 * (float)randomXPos - 40, (float)randomYPos } });
+    }
 
     // background
     sf::Texture bgTexture;
@@ -66,11 +84,13 @@ int main()
 
         window.clear();
 
-        //circle.SetPosition(rb.GetNewPosition(circle.GetPosition(), rb.velocity, rb.acceleration, deltaTime));
-        //circle.draw(window);
-        
         window.draw(bgSprite);
+        
         player->Update(inputDir, window, deltaTime);
+        
+        for (int i = obstacles.size() - 1; i >= 0; i--) {
+            obstacles[i]->Update(Vector2{0,0}, window, deltaTime);
+        }
 
         window.display();
     }
