@@ -38,6 +38,15 @@ void Player::Update(Vector2 input, sf::RenderWindow& window, float dt)
 {
 	rb.UpdateRigidbody(input * (movementForce * 1000), gravity, dt);
 
+	// screen collision
+
+	if (rb.pos.x - radius < 0) {
+		rb.pos.x = 0 + radius;
+	}
+	else if (rb.pos.x + radius > window.getSize().x) {
+		rb.pos.x = window.getSize().x - radius;
+	}
+
 	body.SetPosition(rb.pos);
 	body.draw(window);
 }

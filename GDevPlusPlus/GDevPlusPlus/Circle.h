@@ -5,9 +5,9 @@
 class Circle : public Shape
 {
 private:
-	float radius;
 
 public:
+	float radius;
 	Circle();
 	Circle(float r);
 	//Circle(const Circle& other);

@@ -6,14 +6,16 @@
 
 Rigidbody::Rigidbody() : mass(10), frictionCoefficient(Vector2{7, 2}) {
 	pos = Vector2{ 0,0 };
-	velocity = Vector2(0, -10);
-	acceleration = Vector2();
+	velocity = Vector2{ 0, -10 };
+	acceleration = Vector2{};
+	force = Vector2{};
 }
 
 Rigidbody::Rigidbody(float mass, Vector2 frictionCoefficient) : mass(mass), frictionCoefficient(frictionCoefficient) {
 	pos = Vector2{ 0,0 };
-	velocity = Vector2(0, -10);
+	velocity = Vector2{ 0, -10 };
 	acceleration = Vector2();
+	force = Vector2{};
 }
 
 Rigidbody::Rigidbody(Vector2 pos, float mass, Vector2 frictionCoefficient): pos(pos), mass(mass), frictionCoefficient(frictionCoefficient) {
@@ -21,10 +23,17 @@ Rigidbody::Rigidbody(Vector2 pos, float mass, Vector2 frictionCoefficient): pos(
 
 Rigidbody::~Rigidbody(){
 }
-
-Vector2 Rigidbody::GetNewVelocity(Vector2 force, float time)
+// addforce
+Vector2 Rigidbody::GetNewVelocity(Vector2 force, float time, ForceMode mode)
 {
-	Vector2 newVelocity = velocity + force / mass * time;
+	Vector2 newVelocity;
+
+	if (mode == Impulse) {
+		newVelocity = velocity + force / mass * time;
+	}
+	else if (mode == Force) {
+		newVelocity = velocity + force * (time * time) / mass;
+	}
 	return newVelocity;
 }
 
@@ -36,7 +45,7 @@ Vector2 Rigidbody::GetNewPosition(float time)
 
 Vector2 Rigidbody::CalculateGravity(float gMultiplier) {
 	Vector2 gravity = g * gMultiplier * mass;
-	std::cout << "gravity: " << gravity.x << ", " << gravity.y << std::endl;
+	//std::cout << "gravity: " << gravity.x << ", " << gravity.y << std::endl;
 	return gravity;
 }
 
@@ -52,7 +61,7 @@ void Rigidbody::UpdateRigidbody(Vector2 force, float gravity, float dt) {
 	Vector2 gravityForce = CalculateGravity(gravity);
 	Vector2 finalForce = force + gravityForce + dragForce;
 
-	velocity = GetNewVelocity(finalForce, dt);
+	velocity = GetNewVelocity(finalForce, dt, Impulse);
 	pos = GetNewPosition(dt);
 
 	//std::cout << "acceleration: " << acceleration.x << ", " << acceleration.y << std::endl;

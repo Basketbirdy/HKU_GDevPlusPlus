@@ -4,6 +4,7 @@
 #include "Vector2.h"
 #include "Rigidbody.h"
 #include "Circle.h"
+#include "Entity.h"
 
 class Player
 {

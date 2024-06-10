@@ -13,10 +13,10 @@
 #include "Obstacle.h"
 
 // window
-int windowWidth = 480;
-int windowHeight = 640;
+Vector2 windowSize = Vector2(480, 640);
 
 sf::Clock deltaClock;
+sf::Font font;
 
 // player
 Player* player;
@@ -27,14 +27,35 @@ int obstacleCount = 10;
 
 std::vector<Obstacle*> obstacles;
 
+// points
+sf::Text pointText;
+int pointCount = 0;
+
+// lives
+sf::Text livesText;
+int lifeCount = 3;
 
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode(windowWidth, windowHeight), "Speedracer");
-    window.setFramerateLimit(60);
+    sf::RenderWindow window(sf::VideoMode(windowSize.x, windowSize.y), "Speedracer");
+    window.setFramerateLimit(120);
+
+    // fonts
+    if (!font.loadFromFile("Assets/Fonts/VT323-Regular.ttf")) {
+
+    }
+
+    // text
+    pointText.setFont(font);
+    pointText.setCharacterSize(48);
+    pointText.setPosition(24, 12);
+
+    livesText.setFont(font);
+    livesText.setCharacterSize(48);
+    livesText.setPosition(windowSize.x - 168, 12);
 
     // player
-    player = new Player{ 40, 2, 0, Vector2(windowWidth/2,windowHeight/6 * 5), 1 };
+    player = new Player{ 40, 2, 0, Vector2(windowSize.x/2,windowSize.y/6 * 5), 1 };
     inputDir = Vector2();
 
     // obstacle
@@ -43,7 +64,7 @@ int main()
         int randomXPos = rand() % xRange + 1;
         int yRange = -30 - -2400 + 1;
         int randomYPos = rand() % yRange + -2400;
-        obstacles.push_back(new Obstacle{ 25, 0, 5, 5, Vector2{ (float)windowWidth / 6 * (float)randomXPos - 40, (float)randomYPos } });
+        obstacles.push_back(new Obstacle{ 25, 3, 5, 5, Vector2{ (float)windowSize.x / 6 * (float)randomXPos - 40, (float)randomYPos } });
     }
 
     // background
@@ -58,7 +79,7 @@ int main()
     {
         // calculate deltatime
         auto deltaTime = deltaClock.restart().asSeconds();
-        std::cout << "dt = " << deltaTime << " s" << std::endl;
+        //std::cout << "dt = " << deltaTime << " s" << std::endl;
 
         sf::Event event;
         while (window.pollEvent(event))
@@ -79,7 +100,7 @@ int main()
             inputDir.x = 0;
         }
 
-        std::cout << "Input direction: " << inputDir.x << std::endl;
+        //std::cout << "Input direction: " << inputDir.x << std::endl;
         //rb.UpdateRigidbody(Vector2(), deltaTime);
 
         window.clear();
@@ -87,10 +108,30 @@ int main()
         window.draw(bgSprite);
         
         player->Update(inputDir, window, deltaTime);
-        
+       
+
         for (int i = obstacles.size() - 1; i >= 0; i--) {
-            obstacles[i]->Update(Vector2{0,0}, window, deltaTime);
+            Obstacle* currentObstacle = obstacles[i];
+            currentObstacle->Update(window, deltaTime);
+            
+            // collision
+            if ((currentObstacle->rb.pos - player->rb.pos).Length() < currentObstacle->body.radius + player->body.radius && !currentObstacle->passedPlayer) {
+                // TODO - collide and end the game 
+                lifeCount--;
+                obstacles.erase(obstacles.begin() + i);
+            }
+
+            if (obstacles[i]->rb.pos.y > windowSize.y + 100) {
+                pointCount++;
+                obstacles.erase(obstacles.begin() + i);
+                delete currentObstacle;
+            }
         }
+
+        pointText.setString("points: " + std::to_string(pointCount));
+        window.draw(pointText);
+        livesText.setString("lives: " + std::to_string(lifeCount));
+        window.draw(livesText);
 
         window.display();
     }
