@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 
 #include "Vector2.h"
 #include "Shape.h"
@@ -13,20 +14,28 @@
 #include "Obstacle.h"
 
 // window
-Vector2 windowSize = Vector2(480, 640);
+static Vector2 windowSize = Vector2(480, 640);
 
+// time
 sf::Clock deltaClock;
-sf::Font font;
+float elapsedTime;
 
 // player
 Player* player;
 Vector2 inputDir;
 
 // obstacles
-int obstacleCount = 10;
+static int obstacleCount = 3;
 std::vector<Obstacle*> obstacles;
+static Vector2 horizontalSpeedRange = Vector2(2, 3);
+static Vector2 gravityRange = Vector2(4, 8);
+// spawning
+sf::Clock elapsedClock;
+float spawnTimer;
+static float spawnInterval = 2;
 
 //text
+sf::Font font;
 // points
 sf::Text pointText;
 int pointCount = 0;
@@ -38,13 +47,29 @@ int lifeCount = 3;
 enum GameState { playing, gameover};
 GameState currentState;
 
+static int RandomNumber(int min, int max) {
+    int random = rand() % ((max + 1) - min) + min;
+    //std::cout << random << std::endl;
+    return random;
+}
+
+static int RandomNumber(Vector2 range) {
+    int random = rand() % (((int)range.y + 1) - (int)range.x) + (int)range.x;
+    std::cout << random << std::endl;
+    return random;
+}
+
 int main()
 {
+    // seed
+    srand(time(0));
+
     sf::RenderWindow window(sf::VideoMode(windowSize.x, windowSize.y), "Speedracer");
     window.setFramerateLimit(120);
 
     // game setup
     currentState = playing;
+    spawnTimer = 0;
     sf::Texture gameOverTexture;
     if (!gameOverTexture.loadFromFile("Assets/Images/GameOver;.png")) {
     }
@@ -80,11 +105,14 @@ int main()
     sf::Sprite obstacleSprite(obstacleTexture);
 
     for (int i = obstacleCount; i > 0; i--) {
-        int xRange = 6 - 1 + 1;
-        int randomXPos = rand() % xRange + 1;
-        int yRange = -30 - -2400 + 1;
-        int randomYPos = rand() % yRange + -2400;
-        obstacles.push_back(new Obstacle{ 25, 3, 5, 5, Vector2{ (float)windowSize.x / 6 * (float)randomXPos - 40, (float)randomYPos } , obstacleSprite });
+        // get random values for obstacle values
+        // random starting position
+        int randomXPos = RandomNumber(1, 6);
+        int randomYPos = RandomNumber(-2400, -30);
+        // random speed
+        int randomHorizontalSpeed = RandomNumber(horizontalSpeedRange);
+        int randomGravity = RandomNumber(gravityRange);
+        obstacles.push_back(new Obstacle{ 25, (float)randomHorizontalSpeed, (float)randomGravity, 5, Vector2{ (float)windowSize.x / 6 * (float)randomXPos - 40, (float)randomYPos } , obstacleSprite });
     }
 
     // background setup
@@ -93,12 +121,20 @@ int main()
     }
     sf::Sprite bgSprite(bgTexture);
 
+    // Audio
+    sf::SoundBuffer hitSound;
+    if(!hitSound.loadFromFile("Assets/AudioClips/Hit.wav")){}
+    sf::SoundBuffer pointSound;
+    if(!pointSound.loadFromFile("Assets/AudioClips/Point.wav")){}
+    sf::Sound sound;
+
     // main loop
     while (window.isOpen())
     {
-        // calculate deltatime
+        // time
+        elapsedTime = elapsedClock.getElapsedTime().asSeconds();
+        // deltatime
         auto deltaTime = deltaClock.restart().asSeconds();
-        //std::cout << "dt = " << deltaTime << " s" << std::endl;
 
         sf::Event event;
         while (window.pollEvent(event))
@@ -141,8 +177,24 @@ int main()
 
         if(currentState == playing){
             window.draw(bgSprite);
+            
+            // player update
             player->Update(inputDir, window, deltaTime);
 
+            // obstacles update
+            if (spawnTimer < elapsedTime) {
+                
+                // get random values for obstacle values
+                // random starting position
+                int randomXPos = RandomNumber(1, 6);
+                int randomYPos = RandomNumber(-2400, -30);
+                // random speed
+                int randomHorizontalSpeed = RandomNumber(horizontalSpeedRange);
+                int randomGravity = RandomNumber(gravityRange);
+                obstacles.push_back(new Obstacle{ 25, (float)randomHorizontalSpeed, (float)randomGravity, 5, Vector2{ (float)windowSize.x / 6 * (float)randomXPos - 40, (float)randomYPos } , obstacleSprite });
+
+                spawnTimer += spawnInterval;
+            }
 
             for (int i = obstacles.size() - 1; i >= 0; i--) {
                 Obstacle* currentObstacle = obstacles[i];
@@ -152,11 +204,15 @@ int main()
                 if ((currentObstacle->rb.pos - player->rb.pos).Length() < currentObstacle->body.radius + player->body.radius && !currentObstacle->passedPlayer) {
                     // TODO - collide and end the game 
                     lifeCount--;
+                    sound.setBuffer(hitSound);
+                    sound.play();
                     obstacles.erase(obstacles.begin() + i);
                 }
 
                 if (obstacles[i]->rb.pos.y > windowSize.y + 100) {
                     pointCount++;
+                    sound.setBuffer(pointSound);
+                    sound.play();
                     obstacles.erase(obstacles.begin() + i);
                     delete currentObstacle;
                 }
@@ -189,6 +245,8 @@ int main()
 
     return 0;
 }
+
+
 
 // code for getting a button or key input once
 //if (event.type == sf::Event::KeyPressed)
