@@ -2,10 +2,11 @@
 
 #include <iostream>
 
-Obstacle::Obstacle(float radius, float movementForce, float gravity, float mass, Vector2 pos) : 
+Obstacle::Obstacle(float radius, float movementForce, float gravity, float mass, Vector2 pos, sf::Sprite sprite) : 
 	radius(radius), movementForce(movementForce), gravity(gravity) {
 	rb = Rigidbody{ pos, mass, Vector2 { 7, .6f } };
 	body = Circle{ radius };
+	this->sprite = sprite;
 
 	if (std::rand() >= 0.5) {
 		dir = Vector2{ 1, 0 };
@@ -29,6 +30,7 @@ Obstacle::Obstacle(const Obstacle& other)
 	gravity = other.gravity;
 	body = other.body;
 	rb = other.rb;
+	sprite = other.sprite;
 }
 
 Obstacle& Obstacle::operator=(const Obstacle& other) {
@@ -38,6 +40,7 @@ Obstacle& Obstacle::operator=(const Obstacle& other) {
 		gravity = other.gravity;
 		body = other.body;
 		rb = other.rb;
+		sprite = other.sprite;
 	}
 
 	return *this;
@@ -50,12 +53,12 @@ void Obstacle::Update(sf::RenderWindow& window, float dt)
 
 	if (rb.pos.x - (rb.velocity.x * dt) - radius < 0 && dir.x == -1) {
 		dir = Vector2{ 1, 0 };
-		rb.velocity.x *= 0;
+		rb.velocity.x *= -1;
 		std::cout << "obstacleDir = " << dir.x << std::endl;
 	}
 	else if (rb.pos.x + (rb.velocity.x * dt) + radius > window.getSize().x && dir.x == 1) {
 		dir = Vector2{ -1, 0 };
-		rb.velocity.x *= 0;
+		rb.velocity.x *= -1;
 		std::cout << "obstacleDir = " << dir.x << std::endl;
 	}
 
@@ -64,7 +67,11 @@ void Obstacle::Update(sf::RenderWindow& window, float dt)
 
 	}
 
-	body.SetPosition(rb.pos);
-	body.draw(window);
+	//body.SetPosition(rb.pos);
+	//body.draw(window);
+
+	sprite.setOrigin(body.radius, body.radius);
+	sprite.setPosition(rb.pos.sfVector());
+	window.draw(sprite);
 }
 

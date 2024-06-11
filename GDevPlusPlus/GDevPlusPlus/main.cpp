@@ -24,28 +24,37 @@ Vector2 inputDir;
 
 // obstacles
 int obstacleCount = 10;
-
 std::vector<Obstacle*> obstacles;
 
+//text
 // points
 sf::Text pointText;
 int pointCount = 0;
-
 // lives
 sf::Text livesText;
 int lifeCount = 3;
+
+// game
+enum GameState { playing, gameover};
+GameState currentState;
 
 int main()
 {
     sf::RenderWindow window(sf::VideoMode(windowSize.x, windowSize.y), "Speedracer");
     window.setFramerateLimit(120);
 
-    // fonts
-    if (!font.loadFromFile("Assets/Fonts/VT323-Regular.ttf")) {
+    // game setup
+    currentState = playing;
+    sf::Texture gameOverTexture;
+    if (!gameOverTexture.loadFromFile("Assets/Images/GameOver;.png")) {
+    }
+    sf::Sprite gameOverSprite(gameOverTexture);
 
+    // fonts setup
+    if (!font.loadFromFile("Assets/Fonts/VT323-Regular.ttf")) {
     }
 
-    // text
+    // text setup
     pointText.setFont(font);
     pointText.setCharacterSize(48);
     pointText.setPosition(24, 12);
@@ -54,27 +63,37 @@ int main()
     livesText.setCharacterSize(48);
     livesText.setPosition(windowSize.x - 168, 12);
 
-    // player
-    player = new Player{ 40, 2, 0, Vector2(windowSize.x/2,windowSize.y/6 * 5), 1 };
+    // player setup
+    // player sprites
+    sf::Texture playerTexture;
+    if (!playerTexture.loadFromFile("Assets/Images/Player.png")) {
+    }
+    sf::Sprite playerSprite(playerTexture);
+    player = new Player{ 40, 2, 0, Vector2(windowSize.x/2,windowSize.y/6 * 5), 1, playerSprite };
     inputDir = Vector2();
 
-    // obstacle
+    // obstacles setup
+    //obstacle sprite
+    sf::Texture obstacleTexture;
+    if(!obstacleTexture.loadFromFile("Assets/Images/Obstacle.png")){
+    }
+    sf::Sprite obstacleSprite(obstacleTexture);
+
     for (int i = obstacleCount; i > 0; i--) {
         int xRange = 6 - 1 + 1;
         int randomXPos = rand() % xRange + 1;
         int yRange = -30 - -2400 + 1;
         int randomYPos = rand() % yRange + -2400;
-        obstacles.push_back(new Obstacle{ 25, 3, 5, 5, Vector2{ (float)windowSize.x / 6 * (float)randomXPos - 40, (float)randomYPos } });
+        obstacles.push_back(new Obstacle{ 25, 3, 5, 5, Vector2{ (float)windowSize.x / 6 * (float)randomXPos - 40, (float)randomYPos } , obstacleSprite });
     }
 
-    // background
+    // background setup
     sf::Texture bgTexture;
     if (!bgTexture.loadFromFile("Assets/Images/BackgroundSprite.png")) {
-        std::cout << "Nope, not loading" << std::endl;
     }
-
     sf::Sprite bgSprite(bgTexture);
 
+    // main loop
     while (window.isOpen())
     {
         // calculate deltatime
@@ -88,12 +107,25 @@ int main()
                 window.close();
         }
 
+        // game 
+        if (lifeCount == 0 && currentState != gameover) {
+            currentState = gameover;
+
+            // repurpose existing text objects
+            livesText.setCharacterSize(42);
+            livesText.setPosition(windowSize.x / 2 - 175, 140);
+            livesText.setString("You ran out of lives!");
+            pointText.setCharacterSize(42);
+            pointText.setPosition(windowSize.x / 2 - 60, 170);
+        }
+
+        // Input
         // if player presses left
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::A) || sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
             inputDir.x = -1;
         }
         // if player presses right
-        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D) || sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
             inputDir.x = 1;
         }
         else {
@@ -105,33 +137,52 @@ int main()
 
         window.clear();
 
-        window.draw(bgSprite);
-        
-        player->Update(inputDir, window, deltaTime);
-       
+        // drawing and updating
 
-        for (int i = obstacles.size() - 1; i >= 0; i--) {
-            Obstacle* currentObstacle = obstacles[i];
-            currentObstacle->Update(window, deltaTime);
-            
-            // collision
-            if ((currentObstacle->rb.pos - player->rb.pos).Length() < currentObstacle->body.radius + player->body.radius && !currentObstacle->passedPlayer) {
-                // TODO - collide and end the game 
-                lifeCount--;
-                obstacles.erase(obstacles.begin() + i);
+        if(currentState == playing){
+            window.draw(bgSprite);
+            player->Update(inputDir, window, deltaTime);
+
+
+            for (int i = obstacles.size() - 1; i >= 0; i--) {
+                Obstacle* currentObstacle = obstacles[i];
+                currentObstacle->Update(window, deltaTime);
+
+                // collision
+                if ((currentObstacle->rb.pos - player->rb.pos).Length() < currentObstacle->body.radius + player->body.radius && !currentObstacle->passedPlayer) {
+                    // TODO - collide and end the game 
+                    lifeCount--;
+                    obstacles.erase(obstacles.begin() + i);
+                }
+
+                if (obstacles[i]->rb.pos.y > windowSize.y + 100) {
+                    pointCount++;
+                    obstacles.erase(obstacles.begin() + i);
+                    delete currentObstacle;
+                }
+
             }
 
-            if (obstacles[i]->rb.pos.y > windowSize.y + 100) {
-                pointCount++;
-                obstacles.erase(obstacles.begin() + i);
-                delete currentObstacle;
-            }
+            livesText.setString("lives: " + std::to_string(lifeCount));
+            pointText.setString("Score: " + std::to_string(pointCount));
         }
+        else if (currentState == gameover) {
+            // get rid of the player
+            delete player;
+            player = NULL;
 
-        pointText.setString("points: " + std::to_string(pointCount));
-        window.draw(pointText);
-        livesText.setString("lives: " + std::to_string(lifeCount));
+            // get rid of all remaining obstacles
+
+            
+
+            // show game over screen
+            window.draw(gameOverSprite);
+
+            // exit program
+        }
+        
         window.draw(livesText);
+        window.draw(pointText);
 
         window.display();
     }

@@ -3,9 +3,10 @@
 #include "Player.h"
 #include "Circle.h"
 
-Player::Player(float radius, float movementForce,float gravity, Vector2 pos, float mass): radius(radius), movementForce(movementForce), gravity(gravity) {
+Player::Player(float radius, float movementForce,float gravity, Vector2 pos, float mass, sf::Sprite sprite): radius(radius), movementForce(movementForce), gravity(gravity) {
 	rb = Rigidbody(pos, mass, Vector2{ 7,.6 });
 	body = Circle(radius);
+	this->sprite = sprite;
 }
 
 Player::Player(const Player& other)
@@ -15,6 +16,7 @@ Player::Player(const Player& other)
 	gravity = other.gravity;
 	body = other.body;
 	rb = other.rb;
+	sprite = other.sprite;
 }
 
 Player& Player::operator=(const Player& other) {
@@ -24,6 +26,7 @@ Player& Player::operator=(const Player& other) {
 		gravity = other.gravity;
 		body = other.body;
 		rb = other.rb;
+		sprite = other.sprite;
 	}
 
 	return *this;
@@ -47,6 +50,10 @@ void Player::Update(Vector2 input, sf::RenderWindow& window, float dt)
 		rb.pos.x = window.getSize().x - radius;
 	}
 
-	body.SetPosition(rb.pos);
-	body.draw(window);
+	//body.SetPosition(rb.pos);
+	//body.draw(window);
+
+	sprite.setOrigin(Vector2(body.radius, body.radius).sfVector());
+	sprite.setPosition(rb.pos.sfVector());
+	window.draw(sprite);
 }

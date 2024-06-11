@@ -17,7 +17,9 @@ public:
 	Circle body;
 	Rigidbody rb;
 
-	Player(float radius, float movementForce, float gravity, Vector2 pos, float mass);
+	sf::Sprite sprite;
+
+	Player(float radius, float movementForce, float gravity, Vector2 pos, float mass, sf::Sprite sprite);
 	Player(const Player& other);
 	Player& operator=(const Player& other);
 	~Player();
